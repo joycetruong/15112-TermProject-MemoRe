@@ -30,7 +30,8 @@ class CreateWorkspaceMode(Mode):
         mode.newWorkspaceName.typing(event)
 
     def drawCreateWorkspaceScreen(mode, canvas):
-        canvas.create_rectangle(0, 0, mode.width, mode.height, fill='white smoke')
+        canvas.create_rectangle(0, 0, mode.width, mode.height, 
+                                fill='white smoke')
         canvas.create_text(50, 75, text='Create a New Workspace', 
                             font='Gilroy 40', fill='gray20', anchor=W)
         canvas.create_text(50, 450, text='New Workspace Date:  ',
