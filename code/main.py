@@ -6,24 +6,26 @@
 # Section: C1
 #################################################
 
-# From CMU 112 website 
+# From CMU 112 Animation Part 1 Notes: 
 # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html
 from cmu_112_graphics import *
 
-# Created by me
+# Created by me:
 from button import Button
 from entry import Entry
 from homescreen_mode import HomescreenMode
 from create_workspace_mode import CreateWorkspaceMode
 from workspace_mode import WorkspaceMode
+from note_mode import NoteMode
 
-# trying to make everything into a mode --> does not currently work 
-# refer to homescreen mode
+# ModalApp framework inspired by:
+# https://github.com/spartace98/15-112-Term-Project/
 class Main(ModalApp):
     def appStarted(app):           
         app.runHomescreenMode = HomescreenMode()
         app.runCreateWorkspaceMode = CreateWorkspaceMode()
         app.runWorkspaceMode = WorkspaceMode()
-        app.setActiveMode(app.runWorkspaceMode)
+        app.runNoteMode = NoteMode()
+        app.setActiveMode(app.runHomescreenMode) # run different modes here
 
 Main(width=1000, height=700)

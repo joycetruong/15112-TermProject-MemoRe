@@ -6,11 +6,16 @@
 # Section: C1
 #################################################
 
+# From CMU 112 Animation Part 1 Notes: 
+# https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html
 from cmu_112_graphics import *
+
+# Created by me:
 from button import Button
 from entry import Entry
 from create_workspace_mode import CreateWorkspaceMode
 
+# Fix button text color once pressed + hover color
 class HomescreenMode(Mode):
 
     def appStarted(mode):
@@ -18,8 +23,8 @@ class HomescreenMode(Mode):
                                 (mode.width/2-100, 350, mode.width/2+100,400))
         mode.oldWorkspaceButton = Button("Open Exisiting Workspace", 
                                 (mode.width/2-100, 425, mode.width/2+100, 475))
-        mode.newWorkspaceName = Entry("New Workspace Name", (0,0))
-        mode.runCreateWorkspaceMode = CreateWorkspaceMode()
+        mode.newWorkspaceButton.textColor = 'gray20'
+        mode.newWorkspaceButton.textColor = 'gray20'
 
     def mouseMoved(mode, event):
         if (mode.newWorkspaceButton.isOnButton(event)):
@@ -34,11 +39,9 @@ class HomescreenMode(Mode):
 
     def mousePressed(mode, event):
         if (mode.newWorkspaceButton.isOnButton(event)):
-            mode.newWorkspaceButton.buttonColor = 'white'
             mode.newWorkspaceButton.textColor = 'light blue'
             mode.app.setActiveMode(mode.app.runCreateWorkspaceMode)
         elif (mode.oldWorkspaceButton.isOnButton(event)):
-            mode.oldWorkspaceButton.buttonColor = 'white'
             mode.oldWorkspaceButton.textColor = 'light blue'
 
     def keyPressed(mode, event):
@@ -60,5 +63,3 @@ class HomescreenMode(Mode):
     def redrawAll(mode, canvas):
         mode.drawHomescreen(canvas)
         mode.drawButton(canvas)
-
-    #runmode(width=1000, height=700)

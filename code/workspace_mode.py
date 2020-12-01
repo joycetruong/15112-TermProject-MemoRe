@@ -6,15 +6,26 @@
 # Section: C1
 #################################################
 
+# From CMU 112 Animation Part 1 Notes: 
+# https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html
 from cmu_112_graphics import *
+
+# Created by me:
 from button import Button
 from entry import Entry
 import datetime, math
 
+# Currently very slow due to constant O(N**3) connection generation
 class WorkspaceMode(Mode):
 
     def appStarted(mode):
+        mode.workspaceName = 'Name'
         mode.nodeGroups = [ [1,2,3,4,5],
+                            [1,2,3,4],
+                            [1,2,3],
+                            [1,2],
+                            [1],
+                            [1,2,3,4,5],
                             [1,2,3,4],
                             [1,2,3],
                             [1,2],
@@ -32,6 +43,11 @@ class WorkspaceMode(Mode):
                               [], 
                               [], 
                               [], 
+                              [],
+                              [], 
+                              [], 
+                              [], 
+                              [], 
                               [], 
                               []]
 
@@ -41,14 +57,14 @@ class WorkspaceMode(Mode):
 
     def keyPressed(mode, event):
         pass
-
+    
+    # Algorithm for rows and columns layout inspired by:
+    # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html#exampleGrids
     def drawMap(mode, canvas):
-        canvas.create_rectangle(0, 0, mode.width, mode.height, 
-                                fill='white smoke')
-
         numGroups = len(mode.nodeGroups)
         numRows = math.floor(math.sqrt(numGroups))
         maxGroupsPerRow = math.ceil(numGroups/numRows)
+
         rowCount = 0
         groupCountPerRow = 0
         totalGroupCount = 0
@@ -84,6 +100,8 @@ class WorkspaceMode(Mode):
 
             totalGroupCount += 1
     
+    # Algorithm for drawing nodes inspired by clock creation inspired by:
+    # https://www.cs.cmu.edu/~112/notes/notes-graphics.html#clocksExample
     def drawDot(mode, canvas, dAngle, groupR, groupCx, groupCy, node, numNodes, 
                 currentGroup):
         nodeR = 5
@@ -108,7 +126,9 @@ class WorkspaceMode(Mode):
                                         nodeGroup[node][1], fill='black')
 
     def redrawAll(mode, canvas):
+        canvas.create_rectangle(0, 0, mode.width, mode.height, 
+                                fill='white smoke')
+        canvas.create_text(mode.width/2, 30, text=mode.workspaceName, 
+                            font='Gilroy 30 bold')
         mode.drawMap(canvas)
-
-#runApp(width=1000, height=700)
 
