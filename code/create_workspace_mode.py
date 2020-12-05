@@ -20,9 +20,9 @@ class CreateWorkspaceMode(Mode):
 
     def appStarted(mode):
         mode.newWorkspaceName = Entry('New Workspace Name: ', (50,150), 
-                                        (300, 150), 44)
+                                        (300, 140), 38, 1)
         mode.newWorkspaceDescription = Entry('New Workspace Description: ', 
-                                            (50, 200), (350, 165), 44)
+                                            (50, 225), (350, 215), 38, 6)
         mode.date = datetime.datetime.now()
         mode.dateString = (f'{mode.date.strftime("%A")}, '
                             f'{mode.date.strftime("%B")} ' 
@@ -48,14 +48,14 @@ class CreateWorkspaceMode(Mode):
     def mousePressed(mode, event):
         if ((mode.newWorkspaceName.inputLocation[0]-15 <= event.x <= 
             mode.newWorkspaceName.inputLocation[0]+475)
-            and (mode.newWorkspaceName.inputLocation[1]-15 <= event.y <= 
-            mode.newWorkspaceName.inputLocation[1]+15)):
+            and (mode.newWorkspaceName.inputLocation[1]-5 <= event.y <= 
+            mode.newWorkspaceName.inputLocation[1]+30)):
             mode.newWorkspaceName.isTyping = True
             mode.newWorkspaceDescription.isTyping = False
         elif ((mode.newWorkspaceDescription.inputLocation[0]-15 <= event.x <= 
             mode.newWorkspaceDescription.inputLocation[0]+475)
-            and (mode.newWorkspaceDescription.inputLocation[1]-15 <= event.y <= 
-            mode.newWorkspaceDescription.inputLocation[1]+175)):
+            and (mode.newWorkspaceDescription.inputLocation[1]-5 <= event.y <= 
+            mode.newWorkspaceDescription.inputLocation[1]+150)):
             mode.newWorkspaceDescription.isTyping = True
             mode.newWorkspaceName.isTyping = False
         elif (mode.goHomeButton.isOnButton(event)):
@@ -82,19 +82,19 @@ class CreateWorkspaceMode(Mode):
         mode.newWorkspaceDescription.drawInputPrompt(canvas)       
 
     def drawInput(mode, canvas):
-        mode.newWorkspaceName.showTyping(canvas)
-        mode.newWorkspaceDescription.showTyping(canvas)
+        mode.newWorkspaceName.showPromptAnswerTyping(canvas)
+        mode.newWorkspaceDescription.showPromptAnswerTyping(canvas)
 
     def drawInputBoxes(mode, canvas):
         canvas.create_rectangle(mode.newWorkspaceName.inputLocation[0]-15, 
-                                mode.newWorkspaceName.inputLocation[1]-15, 
+                                mode.newWorkspaceName.inputLocation[1]-5, 
                                 mode.newWorkspaceName.inputLocation[0]+475, 
-                                mode.newWorkspaceName.inputLocation[1]+15, 
+                                mode.newWorkspaceName.inputLocation[1]+30, 
                                 fill='white', outline='black')
         canvas.create_rectangle(mode.newWorkspaceDescription.inputLocation[0]-15, 
-                                mode.newWorkspaceDescription.inputLocation[1]+20, 
+                                mode.newWorkspaceDescription.inputLocation[1]-5, 
                                 mode.newWorkspaceDescription.inputLocation[0]+475, 
-                                mode.newWorkspaceDescription.inputLocation[1]+195, 
+                                mode.newWorkspaceDescription.inputLocation[1]+150, 
                                 fill='white', outline='black')
     
     def drawButtons(mode, canvas):
@@ -106,4 +106,3 @@ class CreateWorkspaceMode(Mode):
         mode.drawInputBoxes(canvas)
         mode.drawInput(canvas)
         mode.drawButtons(canvas)
-

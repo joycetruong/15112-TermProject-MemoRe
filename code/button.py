@@ -1,5 +1,9 @@
 # button.py
 
+# From CMU 112 Animation Part 1 Notes: 
+# https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html
+from cmu_112_graphics import *
+
 class Button(object):
 
     def __init__(self, label, location):
