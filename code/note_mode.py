@@ -24,6 +24,7 @@ class NoteMode(Mode):
                             mode.height/2+10), 10, 1)
         mode.input = Entry('Note Input', (50, 50), (50, 50), 49, 24)
         mode.input.isTyping = True
+        mode.connections = []
 
         mode.saveButton = Button("Save", (mode.width-100, mode.height-80, 
                                     mode.width-40, mode.height-40))
@@ -48,14 +49,27 @@ class NoteMode(Mode):
         mode.enterNameButton = Button("Enter", (mode.width/2+ 60, mode.height/2,
                                 mode.width/2+150, mode.height/2+40))
 
+    def findConnections(mode):
+        writing = mode.input.input.split()
+        notes = []
+        notesUpper = []
+        for note in WorkspaceMode.NOTES:
+            notes.append(note)
+            notesUpper.append(note.upper())
+
+        for word in writing:
+            if (word.upper() in notesUpper):
+                index = notesUpper.index(word.upper())
+                mode.connections.append(notes[index])
 
     def mousePressed(mode, event):
         if (mode.saveButton.isOnButton(event)):
             mode.askName = True
         elif (mode.enterNameButton.isOnButton(event)):
+            mode.findConnections()
             WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
-                                    mode.underlineCoords))] = ['Note1', 'Note2']
+                                    mode.underlineCoords))] = mode.connections
             for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
                                         mode.input.input, mode.highlightCoords, 
                                         mode.underlineCoords))]:
@@ -115,12 +129,15 @@ class NoteMode(Mode):
         else:
             mode.name.isTyping = True
             mode.name.typing(event)
-            if (event.key == 'Enter'):
+            if (event.key == 'Space'):
+                mode.name.input = mode.name.input[:-1] + '-'
+            elif (event.key == 'Enter'):
                 mode.name.isTyping = False
                 mode.name.input = mode.name.input[:-1]
+                mode.findConnections()
                 WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
-                                    mode.underlineCoords))] = ['Note1', 'Note2']
+                                    mode.underlineCoords))] = mode.connections
                 for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
                                             mode.input.input, mode.highlightCoords, 
                                             mode.underlineCoords))]:

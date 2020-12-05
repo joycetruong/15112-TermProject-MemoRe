@@ -14,7 +14,6 @@ from cmu_112_graphics import *
 from button import Button
 from entry import Entry
 from note import Note
-from create_workspace_mode import CreateWorkspaceMode
 
 import datetime, math
 
@@ -32,7 +31,7 @@ class WorkspaceMode(Mode):
                 'Note9': ['Note8', 'Note10'],
                 'Note10': ['Note8', 'Note9', 'Note1']
             }
-    WORKSPACE_NAME = "Workspace Name"
+    WORKSPACE_NAME = 'Name'
     TAGS = {
                 'biology': 'salmon', 
                 'physics': 'pale green',
@@ -176,9 +175,14 @@ class WorkspaceMode(Mode):
                 for tag in WorkspaceMode.ADD_TAG_LOCATIONS:
                     if ((WorkspaceMode.ADD_TAG_LOCATIONS[tag][0] <= event.x <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][2])
                         and (WorkspaceMode.ADD_TAG_LOCATIONS[tag][1] <= event.y <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][3])):
-                        WorkspaceMode.NOTE_TAGS[note].append(tag)
-                        if (WorkspaceMode.TAG_PRESSED[tag] == True):
-                            WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
+                        if (tag not in WorkspaceMode.NOTE_TAGS[note]):
+                            WorkspaceMode.NOTE_TAGS[note].append(tag)
+                            if (WorkspaceMode.TAG_PRESSED[tag] == True):
+                                WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
+                        else:
+                            WorkspaceMode.NOTE_TAGS[note].remove(tag)
+                            if (WorkspaceMode.TAG_PRESSED[tag] == True):
+                                WorkspaceMode.NOTES_HIGHLIGHTED.remove(note)
                         WorkspaceMode.NOTE_SELECTED[note] = False
                         mode.showAddTagBox = False
                 if (mode.backTagButton.isOnButton(event)):
@@ -239,7 +243,8 @@ class WorkspaceMode(Mode):
                                 groupCy+noteR, fill='black')
             WorkspaceMode.NOTE_GROUP_LOCATIONS[currentGroup].append((groupCx, groupCy))
             WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[noteName] = (groupCx, groupCy)
-            canvas.create_text(groupCx, groupCy+20, text=noteName)
+            canvas.create_text(groupCx, groupCy+20, text=noteName,  
+                                font='Gilroy 10', fill='gray20')
         else:
             noteAngle = math.pi/2 - dAngle * note
             noteCx = groupCx + groupR * math.cos(noteAngle)
@@ -339,8 +344,8 @@ class WorkspaceMode(Mode):
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')
-        canvas.create_text(mode.width/2, 30, text=WorkspaceMode.WORKSPACE_NAME, 
-                            font='Gilroy 30 bold', fill='gray20')
+        canvas.create_text(20, 30, text=WorkspaceMode.WORKSPACE_NAME, 
+                            font='Gilroy 30 bold', fill='gray20', anchor=W)
         mode.drawMap(canvas)
         mode.drawHighlightedTags(canvas)
         mode.drawTagBox(canvas)

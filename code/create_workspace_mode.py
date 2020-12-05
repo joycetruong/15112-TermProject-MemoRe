@@ -14,6 +14,7 @@ from cmu_112_graphics import *
 from button import Button
 from entry import Entry
 import datetime
+from workspace_mode import WorkspaceMode
 
 # Fix button text color once pressed + hover color
 class CreateWorkspaceMode(Mode):
@@ -63,6 +64,7 @@ class CreateWorkspaceMode(Mode):
             mode.app.setActiveMode(mode.app.runHomescreenMode)
         elif (mode.createWorkspaceButton.isOnButton(event)):
             mode.createWorkspaceButton.textColor = 'light blue'
+            WorkspaceMode.WORKSPACE_NAME = mode.newWorkspaceName
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
 
     def keyPressed(mode, event):
