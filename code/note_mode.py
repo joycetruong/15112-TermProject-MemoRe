@@ -56,6 +56,17 @@ class NoteMode(Mode):
             WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
                                     mode.underlineCoords))] = ['Note1', 'Note2']
+            for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
+                                        mode.input.input, mode.highlightCoords, 
+                                        mode.underlineCoords))]:
+                WorkspaceMode.NOTES[note].append(str(Note(mode.name.input, 
+                                        mode.input.input, mode.highlightCoords, 
+                                        mode.underlineCoords)))
+            WorkspaceMode.NOTE_TAGS[str(Note(mode.name.input, mode.input.input,
+                                    mode.highlightCoords, 
+                                    mode.underlineCoords))] = []
+            WorkspaceMode.createNoteGroups()
+            mode.appStarted()
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
         elif (mode.backButton.isOnButton(event)):
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
@@ -110,6 +121,17 @@ class NoteMode(Mode):
                 WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
                                     mode.underlineCoords))] = ['Note1', 'Note2']
+                for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
+                                            mode.input.input, mode.highlightCoords, 
+                                            mode.underlineCoords))]:
+                    WorkspaceMode.NOTES[note].append(str(Note(mode.name.input, 
+                                            mode.input.input, mode.highlightCoords, 
+                                            mode.underlineCoords)))
+                WorkspaceMode.NOTE_TAGS[str(Note(mode.name.input, mode.input.input,
+                                        mode.highlightCoords, 
+                                        mode.underlineCoords))] = []
+                WorkspaceMode.createNoteGroups()
+                mode.appStarted()
                 mode.app.setActiveMode(mode.app.runWorkspaceMode)
     
     def toolChange(mode, event, button, tool):
@@ -183,7 +205,7 @@ class NoteMode(Mode):
         mode.name.drawInputPrompt(canvas)
         mode.enterNameButton.makeButton(canvas)
         mode.name.showTyping(canvas)
-        
+    
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')
@@ -201,3 +223,4 @@ class NoteMode(Mode):
 
         if (mode.askName == True):
             mode.drawAskNameBox(canvas)
+        
