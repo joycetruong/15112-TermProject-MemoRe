@@ -1,5 +1,7 @@
 #################################################
 # create_workspace_mode.py
+# this is the create workspace screen that will allow us to create a new
+# workspace
 #
 # Your name: Joyce Truong
 # Your andrew id: btruong
@@ -60,10 +62,8 @@ class CreateWorkspaceMode(Mode):
             mode.newWorkspaceDescription.isTyping = True
             mode.newWorkspaceName.isTyping = False
         elif (mode.goHomeButton.isOnButton(event)):
-            mode.goHomeButton.textColor = 'light blue'
             mode.app.setActiveMode(mode.app.runHomescreenMode)
         elif (mode.createWorkspaceButton.isOnButton(event)):
-            mode.createWorkspaceButton.textColor = 'light blue'
             WorkspaceMode.WORKSPACE_NAME = mode.newWorkspaceName
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
 

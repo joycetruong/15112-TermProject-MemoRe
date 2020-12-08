@@ -1,4 +1,11 @@
+#################################################
 # button.py
+# this is the button object that will let me create clickable buttons in my app
+#
+# Your name: Joyce Truong
+# Your andrew id: btruong
+# Section: C1
+#################################################
 
 # From CMU 112 Animation Part 1 Notes: 
 # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html

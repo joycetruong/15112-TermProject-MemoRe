@@ -1,5 +1,7 @@
 #################################################
 # main.py
+# this is the main program for my app to be ran and allows for each screen
+# mode to be called when necessary --> default is homescreen mode
 #
 # Your name: Joyce Truong
 # Your andrew id: btruong
@@ -17,6 +19,7 @@ from homescreen_mode import HomescreenMode
 from create_workspace_mode import CreateWorkspaceMode
 from workspace_mode import WorkspaceMode
 from note_mode import NoteMode
+# from instructions_mode import InstructionsMode
 
 # ModalApp framework inspired by:
 # https://github.com/spartace98/15-112-Term-Project/
@@ -24,6 +27,7 @@ class Main(ModalApp):
     def appStarted(app):           
         app.runHomescreenMode = HomescreenMode()
         app.runCreateWorkspaceMode = CreateWorkspaceMode()
+        # app.runInstructionsMode = InstructionsMode()
         app.runWorkspaceMode = WorkspaceMode()
         app.runNoteMode = NoteMode()
         app.setActiveMode(app.runWorkspaceMode) # run different modes here

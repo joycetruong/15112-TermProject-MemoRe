@@ -1,4 +1,11 @@
+#################################################
 # entry.py
+# this is the entry object that will allow me to get user input in the GUI
+#
+# Your name: Joyce Truong
+# Your andrew id: btruong
+# Section: C1
+#################################################
 
 # From CMU 112 Animation Part 1 Notes: 
 # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html

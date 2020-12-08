@@ -1,5 +1,7 @@
 #################################################
 # workspace_mode.py
+# this is the mode that runs the entire mindmap with the ability to add tags
+# and create new notes
 #
 # Your name: Joyce Truong
 # Your andrew id: btruong
@@ -18,6 +20,13 @@ from note import Note
 import datetime, math
 
 class WorkspaceMode(Mode):
+
+    NOTE_OBJECTS = {Note('Note1', '', [], []), Note('Note2', '', [], []),
+                    Note('Note3', '', [], []), Note('Note4', '', [], []), 
+                    Note('Note5', '', [], []), Note('Note6', '', [], []),
+                    Note('Note7', '', [], []), Note('Note8', '', [], []),
+                    Note('Note9', '', [], []), Note('Note10', '', [], [])}
+    ACTIVE_NOTE = None
 
     NOTES = {
                 'Note1': ['Note2', 'Note3', 'Note10'], 
@@ -97,15 +106,20 @@ class WorkspaceMode(Mode):
                         'Note10': False
                     }
     ADD_TAG_LOCATIONS = {}
+
+    LOADING_NOTE = False
     
     def appStarted(mode):
         WorkspaceMode.createNoteGroups()
 
         mode.createNewNoteButton = Button("Create New Note", (mode.width-190, 
                                     10, mode.width-10, 50))
+        mode.showNoteOptionsBox = False
+        mode.noteOptionsBoxLocation = (0,0)
         mode.showAddTagBox = False
         mode.addTagBoxLocation = (0,0)
-        mode.backTagButton = Button("X", (0,0,0,0))
+        mode.openNote = False
+        mode.xButton = Button("X", (0,0,0,0))
 
     @staticmethod
     def createNoteGroups():
@@ -138,6 +152,8 @@ class WorkspaceMode(Mode):
 
     def mousePressed(mode, event):
         if (mode.createNewNoteButton.isOnButton(event)):
+            mode.showNoteOptionsBox = False
+            mode.showAddTagBox = False
             mode.app.setActiveMode(mode.app.runNoteMode)
 
         for tag in WorkspaceMode.TAG_LOCATIONS:
@@ -161,33 +177,64 @@ class WorkspaceMode(Mode):
                             WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1]) 
                             <= 10):
                 if (WorkspaceMode.NOTE_SELECTED[note] == False):
-                    mode.showAddTagBox = True
+                    for otherNote in WorkspaceMode.NOTE_SELECTED:
+                        WorkspaceMode.NOTE_SELECTED[otherNote] = False
+                    mode.showNoteOptionsBox = True
                     if (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]+250 > mode.width):
-                        mode.addTagBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]-250, 
+                        mode.noteOptionsBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]-250, 
                                                     WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1])
                     else:
-                        mode.addTagBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]+50, 
+                        mode.noteOptionsBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]+50, 
                                                     WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1])
                     WorkspaceMode.NOTE_SELECTED[note] = True
 
         for note in WorkspaceMode.NOTE_SELECTED:
             if (WorkspaceMode.NOTE_SELECTED[note] == True):
-                for tag in WorkspaceMode.ADD_TAG_LOCATIONS:
-                    if ((WorkspaceMode.ADD_TAG_LOCATIONS[tag][0] <= event.x <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][2])
-                        and (WorkspaceMode.ADD_TAG_LOCATIONS[tag][1] <= event.y <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][3])):
-                        if (tag not in WorkspaceMode.NOTE_TAGS[note]):
-                            WorkspaceMode.NOTE_TAGS[note].append(tag)
-                            if (WorkspaceMode.TAG_PRESSED[tag] == True):
-                                WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
+                if (mode.showNoteOptionsBox == True):
+                    if ((mode.noteOptionsBoxLocation[0] <= event.x <= mode.noteOptionsBoxLocation[0]+210)
+                        and (mode.noteOptionsBoxLocation[1] <= event.y <= mode.noteOptionsBoxLocation[1]+50)):
+                        mode.showNoteOptionsBox = False
+                        for noteObject in WorkspaceMode.NOTE_OBJECTS:
+                            if (note == str(noteObject)):
+                                WorkspaceMode.ACTIVE_NOTE = noteObject
+                        WorkspaceMode.NOTE_SELECTED[note] = False
+                        WorkspaceMode.LOADING_NOTE = True
+                        mode.app.setActiveMode(mode.app.runNoteMode)
+                    elif ((mode.noteOptionsBoxLocation[0] <= event.x <= mode.noteOptionsBoxLocation[0]+210)
+                        and (mode.noteOptionsBoxLocation[1]+50 <= event.y <= mode.noteOptionsBoxLocation[1]+100)):
+                        mode.showAddTagBox = True
+                        if (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]+250 > mode.width):
+                            mode.addTagBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]-250, 
+                                                        WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1])
                         else:
-                            WorkspaceMode.NOTE_TAGS[note].remove(tag)
-                            if (WorkspaceMode.TAG_PRESSED[tag] == True):
-                                WorkspaceMode.NOTES_HIGHLIGHTED.remove(note)
+                            mode.addTagBoxLocation = (WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0]+50, 
+                                                        WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1])
+                        mode.showNoteOptionsBox = False
+                        return # stop clicking blue underneath and add tag box not showing up
+                    elif ((mode.noteOptionsBoxLocation[0] <= event.x <= mode.noteOptionsBoxLocation[0]+210)
+                        and (mode.noteOptionsBoxLocation[1]+100 <= event.y <= mode.noteOptionsBoxLocation[1]+150)):
+                        pass # add manual linking
+                    elif (mode.xButton.isOnButton(event)):
+                        WorkspaceMode.NOTE_SELECTED[note] = False
+                        mode.showNoteOptionsBox = False
+                
+                if (mode.showAddTagBox == True):
+                    for tag in WorkspaceMode.ADD_TAG_LOCATIONS:
+                        if ((WorkspaceMode.ADD_TAG_LOCATIONS[tag][0] <= event.x <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][2])
+                            and (WorkspaceMode.ADD_TAG_LOCATIONS[tag][1] <= event.y <= WorkspaceMode.ADD_TAG_LOCATIONS[tag][3])):
+                            if (tag not in WorkspaceMode.NOTE_TAGS[note]):
+                                WorkspaceMode.NOTE_TAGS[note].append(tag)
+                                if (WorkspaceMode.TAG_PRESSED[tag] == True):
+                                    WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
+                            else:
+                                WorkspaceMode.NOTE_TAGS[note].remove(tag)
+                                if (WorkspaceMode.TAG_PRESSED[tag] == True):
+                                    WorkspaceMode.NOTES_HIGHLIGHTED.remove(note)
+                            WorkspaceMode.NOTE_SELECTED[note] = False
+                            mode.showAddTagBox = False
+                    if (mode.xButton.isOnButton(event)):
                         WorkspaceMode.NOTE_SELECTED[note] = False
                         mode.showAddTagBox = False
-                if (mode.backTagButton.isOnButton(event)):
-                    WorkspaceMode.NOTE_SELECTED[note] = False
-                    mode.showAddTagBox = False
 
     # Algorithm for rows and columns layout inspired by:
     # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html#exampleGrids
@@ -214,7 +261,6 @@ class WorkspaceMode(Mode):
                 groupCx = margin + groupR + 2 * groupR * (groupCountPerRow)
                 groupCy = groupR + 2 * groupR * (rowCount)
 
-            #canvas.create_oval(groupCx-groupR, groupCy-groupR, groupCx+groupR, groupCy+groupR, fill='red')
             groupR *= 0.6
 
             for note in range(len(noteGroup)):
@@ -307,14 +353,48 @@ class WorkspaceMode(Mode):
                                             35+tagSize+dx, mode.height-170+dy)
                 dx += tagSize + 20
     
+    def drawNoteOptionsBox(mode, canvas):
+        canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
+                                    mode.noteOptionsBoxLocation[1], 
+                                    mode.noteOptionsBoxLocation[0]+210, 
+                                    mode.noteOptionsBoxLocation[1]+50, 
+                                    fill='white')
+        canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
+                           mode.noteOptionsBoxLocation[1]+25, 
+                           text='Open Note', font='Gilroy 15', fill='gray20')
+        canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
+                                    mode.noteOptionsBoxLocation[1]+50, 
+                                    mode.noteOptionsBoxLocation[0]+210, 
+                                    mode.noteOptionsBoxLocation[1]+100, 
+                                    fill='white')
+        canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
+                           mode.noteOptionsBoxLocation[1]+75, 
+                           text='Tag', font='Gilroy 15', fill='gray20')
+        canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
+                                    mode.noteOptionsBoxLocation[1]+100, 
+                                    mode.noteOptionsBoxLocation[0]+210, 
+                                    mode.noteOptionsBoxLocation[1]+150, 
+                                    fill='white')
+        canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
+                           mode.noteOptionsBoxLocation[1]+125, 
+                           text='Link', font='Gilroy 15', fill='gray20')
+        
+        mode.xButton.location = mode.noteOptionsBoxLocation[0]-30, \
+                                      mode.noteOptionsBoxLocation[1]-30, \
+                                      mode.noteOptionsBoxLocation[0], \
+                                      mode.noteOptionsBoxLocation[1] 
+        mode.xButton.makeButton(canvas)
+        
+
     def drawAddTagBox(mode, canvas):
         canvas.create_rectangle(mode.addTagBoxLocation[0], 
                                     mode.addTagBoxLocation[1], 
                                     mode.addTagBoxLocation[0]+210, 
                                     mode.addTagBoxLocation[1]+210, 
                                     fill='white')
-        canvas.create_text(mode.addTagBoxLocation[0]+105, mode.addTagBoxLocation[1]+20,
-                            text='Add Tag', font='Gilroy 15')
+        canvas.create_text(mode.addTagBoxLocation[0]+105, 
+                            mode.addTagBoxLocation[1]+20,
+                            text='Add/Remove Tag', font='Gilroy 15')
 
         dx = dy = 0                   
         for tag in WorkspaceMode.TAGS:
@@ -334,12 +414,11 @@ class WorkspaceMode(Mode):
                                                         mode.addTagBoxLocation[1]+70+dy)
                 dx += 40
         
-        mode.backTagButton.location = mode.addTagBoxLocation[0], \
+        mode.xButton.location = mode.addTagBoxLocation[0], \
                                       mode.addTagBoxLocation[1], \
                                       mode.addTagBoxLocation[0] + 30, \
                                       mode.addTagBoxLocation[1] + 30 
-
-        mode.backTagButton.makeButton(canvas)
+        mode.xButton.makeButton(canvas)
         
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
@@ -351,6 +430,9 @@ class WorkspaceMode(Mode):
         mode.drawTagBox(canvas)
         mode.createNewNoteButton.makeButton(canvas)
     
+        if (mode.showNoteOptionsBox == True):
+            mode.drawNoteOptionsBox(canvas)
+            
         if (mode.showAddTagBox == True):
             mode.drawAddTagBox(canvas)
 

@@ -1,5 +1,6 @@
 #################################################
 # note_mode.py
+# this is the mode that allows users to create notes in a text editor
 #
 # Your name: Joyce Truong
 # Your andrew id: btruong
@@ -17,14 +18,16 @@ from note import Note
 from workspace_mode import WorkspaceMode
 
 class NoteMode(Mode):
-    
+
     def appStarted(mode):
+
         mode.name = Entry('Enter Note Name:', (mode.width/2-80, 
                             mode.height/2-30), (mode.width/2-140, 
                             mode.height/2+10), 10, 1)
         mode.input = Entry('Note Input', (50, 50), (50, 50), 49, 24)
         mode.input.isTyping = True
         mode.connections = []
+        mode.loadedNote = WorkspaceMode.ACTIVE_NOTE
 
         mode.saveButton = Button("Save", (mode.width-100, mode.height-80, 
                                     mode.width-40, mode.height-40))
@@ -49,6 +52,13 @@ class NoteMode(Mode):
         mode.enterNameButton = Button("Enter", (mode.width/2+ 60, mode.height/2,
                                 mode.width/2+150, mode.height/2+40))
 
+    def loadNote(mode):
+        if (mode.loadedNote != None):
+            mode.name.input = WorkspaceMode.ACTIVE_NOTE.name
+            mode.input.input = WorkspaceMode.ACTIVE_NOTE.input
+            mode.highlightCoords = WorkspaceMode.ACTIVE_NOTE.highlights
+            mode.underlineCoords = WorkspaceMode.ACTIVE_NOTE.underlines
+
     def findConnections(mode):
         writing = mode.input.input.split()
         notes = []
@@ -70,6 +80,10 @@ class NoteMode(Mode):
             WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
                                     mode.underlineCoords))] = mode.connections
+            WorkspaceMode.NOTE_OBJECTS.add(Note(mode.name.input, 
+                                    mode.input.input,
+                                    mode.highlightCoords, 
+                                    mode.underlineCoords))
             for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
                                         mode.input.input, mode.highlightCoords, 
                                         mode.underlineCoords))]:
@@ -79,10 +93,15 @@ class NoteMode(Mode):
             WorkspaceMode.NOTE_TAGS[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
                                     mode.underlineCoords))] = []
+            WorkspaceMode.NOTE_SELECTED[str(Note(mode.name.input, 
+                                        mode.input.input,
+                                        mode.highlightCoords, 
+                                        mode.underlineCoords))] = False
             WorkspaceMode.createNoteGroups()
             mode.appStarted()
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
         elif (mode.backButton.isOnButton(event)):
+            mode.appStarted()
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
         elif (mode.boldButton.isOnButton(event)):
             mode.styleChange(event, mode.boldButton, 'bolded')
@@ -138,15 +157,26 @@ class NoteMode(Mode):
                 WorkspaceMode.NOTES[str(Note(mode.name.input, mode.input.input,
                                     mode.highlightCoords, 
                                     mode.underlineCoords))] = mode.connections
+                WorkspaceMode.NOTE_OBJECTS.add(Note(mode.name.input, 
+                                    mode.input.input,
+                                    mode.highlightCoords, 
+                                    mode.underlineCoords))
                 for note in WorkspaceMode.NOTES[str(Note(mode.name.input, 
-                                            mode.input.input, mode.highlightCoords, 
+                                            mode.input.input, 
+                                            mode.highlightCoords, 
                                             mode.underlineCoords))]:
                     WorkspaceMode.NOTES[note].append(str(Note(mode.name.input, 
-                                            mode.input.input, mode.highlightCoords, 
+                                            mode.input.input, 
+                                            mode.highlightCoords, 
                                             mode.underlineCoords)))
-                WorkspaceMode.NOTE_TAGS[str(Note(mode.name.input, mode.input.input,
+                WorkspaceMode.NOTE_TAGS[str(Note(mode.name.input, 
+                                        mode.input.input,
                                         mode.highlightCoords, 
                                         mode.underlineCoords))] = []
+                WorkspaceMode.NOTE_SELECTED[str(Note(mode.name.input, 
+                                        mode.input.input,
+                                        mode.highlightCoords, 
+                                        mode.underlineCoords))] = False
                 WorkspaceMode.createNoteGroups()
                 mode.appStarted()
                 mode.app.setActiveMode(mode.app.runWorkspaceMode)
@@ -224,6 +254,11 @@ class NoteMode(Mode):
         mode.name.showTyping(canvas)
     
     def redrawAll(mode, canvas):
+        if (WorkspaceMode.LOADING_NOTE == True):
+            mode.loadedNote = WorkspaceMode.ACTIVE_NOTE
+            mode.loadNote()
+            WorkspaceMode.LOADING_NOTE = False
+
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')
         canvas.create_rectangle(0, 0, mode.width-300, mode.height, fill='white',

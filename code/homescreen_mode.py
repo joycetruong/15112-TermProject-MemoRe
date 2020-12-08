@@ -1,5 +1,6 @@
 #################################################
 # homescreen_mode.py
+# this is the starting screen for my app
 #
 # Your name: Joyce Truong
 # Your andrew id: btruong
@@ -21,7 +22,7 @@ class HomescreenMode(Mode):
     def appStarted(mode):
         mode.newWorkspaceButton = Button("Create New Workspace", 
                                 (mode.width/2-100, 350, mode.width/2+100,400))
-        mode.oldWorkspaceButton = Button("Open Exisiting Workspace", 
+        mode.instructionsButton = Button("Instructions", 
                                 (mode.width/2-100, 425, mode.width/2+100, 475))
         mode.newWorkspaceButton.textColor = 'gray20'
         mode.newWorkspaceButton.textColor = 'gray20'
@@ -32,17 +33,17 @@ class HomescreenMode(Mode):
         elif (not mode.newWorkspaceButton.isOnButton(event)):
             mode.newWorkspaceButton.buttonColor = 'white'
         
-        if (mode.oldWorkspaceButton.isOnButton(event)):
-            mode.oldWorkspaceButton.buttonColor = 'light blue'
-        elif (not mode.oldWorkspaceButton.isOnButton(event)):
-            mode.oldWorkspaceButton.buttonColor = 'white'
+        if (mode.instructionsButton.isOnButton(event)):
+            mode.instructionsButton.buttonColor = 'light blue'
+        elif (not mode.instructionsButton.isOnButton(event)):
+            mode.instructionsButton.buttonColor = 'white'
 
     def mousePressed(mode, event):
         if (mode.newWorkspaceButton.isOnButton(event)):
-            mode.newWorkspaceButton.textColor = 'light blue'
             mode.app.setActiveMode(mode.app.runCreateWorkspaceMode)
-        elif (mode.oldWorkspaceButton.isOnButton(event)):
-            mode.oldWorkspaceButton.textColor = 'light blue'
+        elif (mode.instructionsButton.isOnButton(event)):
+            pass
+            #mode.app.setActiveMode(mode.app.runInstructionsMode)
 
     def keyPressed(mode, event):
         mode.newWorkspaceName.typing(event)
@@ -58,7 +59,7 @@ class HomescreenMode(Mode):
 
     def drawButton(mode, canvas):
         mode.newWorkspaceButton.makeButton(canvas)
-        mode.oldWorkspaceButton.makeButton(canvas)
+        mode.instructionsButton.makeButton(canvas)
 
     def redrawAll(mode, canvas):
         mode.drawHomescreen(canvas)
