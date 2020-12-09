@@ -74,6 +74,8 @@ class InstructionsMode(Mode):
                             fill='gray20', font='Gilroy 15', anchor=W)
         canvas.create_text(50, 370, text='   -   Typing \'#\' on a new line makes that line a header.', 
                             fill='gray20', font='Gilroy 15', anchor=W)
+        canvas.create_text(50, 395, text='   -   You must click off of Italicize or Bold to create a heading.', 
+                            fill='gray20', font='Gilroy 15', anchor=W)
 
     def redrawAll(mode, canvas):
         mode.drawButtons(canvas)

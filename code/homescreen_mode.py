@@ -44,9 +44,6 @@ class HomescreenMode(Mode):
         elif (mode.instructionsButton.isOnButton(event)):
             mode.app.setActiveMode(mode.app.runInstructionsMode)
 
-    def keyPressed(mode, event):
-        mode.newWorkspaceName.typing(event)
-
     def drawHomescreen(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')

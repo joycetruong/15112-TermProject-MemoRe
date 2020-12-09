@@ -107,9 +107,13 @@ class Entry(object):
                                 self.input += event.key
                                 self.currentLineLength += 1  
                     elif (style == 'bolded'):
+                        if (event.key == '??'):
+                            pass
                         self.input += '~BLD~' + event.key
                         self.currentLineLength += 1 
                     elif (style == 'italicized'):
+                        if (event.key == '??'):
+                            pass
                         self.input += '~ITL~' + event.key
                         self.currentLineLength += 1 
                     if (self.currentLineLength >= self.lineLength): 

@@ -137,9 +137,16 @@ class WorkspaceMode(Mode):
         WorkspaceMode.NOTE_GROUP_LOCATIONS = []
         for note in WorkspaceMode.NOTES:
             if (note not in WorkspaceMode.NOTES_INCLUDED):
-                WorkspaceMode.NOTE_GROUPS.append([note])
-                WorkspaceMode.NOTES_INCLUDED.append(note)
-                WorkspaceMode.NOTE_GROUP_LOCATIONS.append([])
+                for group in range(len(WorkspaceMode.NOTE_GROUPS)):
+                    for noteLink in WorkspaceMode.NOTES[note]:
+                        if (noteLink in WorkspaceMode.NOTE_GROUPS[group]):
+                            WorkspaceMode.NOTE_GROUPS[group].append(note)
+                            WorkspaceMode.NOTES_INCLUDED.append(note)
+                            WorkspaceMode.NOTE_GROUP_LOCATIONS.append([])
+                if (note not in WorkspaceMode.NOTES_INCLUDED):    
+                    WorkspaceMode.NOTE_GROUPS.append([note])
+                    WorkspaceMode.NOTES_INCLUDED.append(note)
+                    WorkspaceMode.NOTE_GROUP_LOCATIONS.append([])
             for group in range(len(WorkspaceMode.NOTE_GROUPS)):
                 if (note in WorkspaceMode.NOTE_GROUPS[group]):
                     groupNum = group
@@ -551,7 +558,7 @@ class WorkspaceMode(Mode):
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')
-        canvas.create_text(20, 30, text=WorkspaceMode.WORKSPACE_NAME, 
+        canvas.create_text(20, 35, text=WorkspaceMode.WORKSPACE_NAME, 
                             font='Gilroy 30 bold', fill='gray20', anchor=W)
         mode.drawMap(canvas)
         mode.drawHighlightedTags(canvas)
