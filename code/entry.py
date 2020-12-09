@@ -29,6 +29,7 @@ class Entry(object):
                        'italicized': False}
         self.isHeading = False
         self.lastLineLength = 0
+        self.lastKeyEnter = False
     
     def __repr__(self):
         return self.input
@@ -39,6 +40,7 @@ class Entry(object):
             if (event.key == 'Space'):
                 self.input += ' '
                 self.currentLineLength += 1 
+                self.lastKeyEnter = False
             elif (event.key == 'Delete'):
                 if (self.input == ''):
                     pass
@@ -52,16 +54,22 @@ class Entry(object):
                     or (self.input[-6:-1] == '~ITL~'))):
                     self.input = self.input[:-6]
                 elif ((len(self.input) >= 6) and (self.input[-6:] == 'DOUB\n\n')):
-                    if (self.lastLineLength == 0):
+                    if (self.lastKeyEnter == True):
+                        self.currentLineLength = self.lastLineLength
+                        self.input = self.input[:-6]
+                    elif (self.lastLineLength == 0):
                         self.currentLineLength = 0
                         self.input = self.input[:-6]
                     elif (self.lastLineLength < self.lineLength):
                         self.currentLineLength = self.lastLineLength - 1
                         self.input = self.input[:-8]
                     else:
-                        self.currentLineLength = self.lineLength - 1
+                        self.currentLineLength = self.lineLength
                         self.input = self.input[:-8]
                     self.isHeading = True
+                elif (self.lastKeyEnter == True):
+                    self.input = self.input[:-1]
+                    self.currentLineLength = self.lastLineLength
                 elif (self.input[-1] == '\n'):
                     if (self.lastLineLength == 0):
                         self.currentLineLength  = 0
@@ -76,7 +84,7 @@ class Entry(object):
                 else:
                     self.input = self.input[:-1]
                     self.currentLineLength -= 1
-
+                self.lastKeyEnter = False
             elif (event.key == 'Enter'):
                 if (self.isHeading == True):
                     self.input += 'DOUB\n\n'
@@ -87,6 +95,7 @@ class Entry(object):
                     self.input += '\n'
                     self.lastLineLength = self.currentLineLength
                     self.currentLineLength = 0
+                self.lastKeyEnter = True
 
             elif (event.key in bannedKeys):
                 pass
@@ -118,7 +127,7 @@ class Entry(object):
                         self.currentLineLength += 1 
                     if (self.currentLineLength >= self.lineLength): 
                         if (self.isHeading == True):
-                            self.input += '\n\n'
+                            self.input += 'DOUB\n\n'
                             self.lastLineLength = self.lineLength
                             self.currentLineLength = 0
                             self.isHeading = False
@@ -126,6 +135,7 @@ class Entry(object):
                             self.input += '\n' 
                             self.lastLineLength = self.lineLength
                             self.currentLineLength = 0 
+                self.lastKeyEnter = False
 
     def drawInputPrompt(self, canvas):
         canvas.create_text(self.promptLocation[0], self.promptLocation[1], 

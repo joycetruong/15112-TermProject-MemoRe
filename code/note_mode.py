@@ -51,11 +51,14 @@ class NoteMode(Mode):
         mode.askName = False
         mode.enterNameButton = Button("Enter", (mode.width/2+ 60, mode.height/2,
                                 mode.width/2+150, mode.height/2+40))
+        mode.wantHeading = False
 
     def loadNote(mode):
         if (mode.loadedNote != None):
             mode.name.input = WorkspaceMode.ACTIVE_NOTE.name
             mode.input.input = WorkspaceMode.ACTIVE_NOTE.input
+            if (mode.wantHeading == True):
+                mode.input.isHeading = True
             mode.highlightCoords = WorkspaceMode.ACTIVE_NOTE.highlights
             mode.underlineCoords = WorkspaceMode.ACTIVE_NOTE.underlines
 
@@ -97,8 +100,13 @@ class NoteMode(Mode):
                                         mode.input.input,
                                         mode.highlightCoords, 
                                         mode.underlineCoords))] = False
+            if (mode.input.isHeading == True):
+                    temp = True
+            else:
+                temp = False
             WorkspaceMode.createNoteGroups()
             mode.appStarted()
+            mode.wantHeading = temp
             mode.app.setActiveMode(mode.app.runWorkspaceMode)
         elif (mode.backButton.isOnButton(event)):
             mode.appStarted()
@@ -188,8 +196,13 @@ class NoteMode(Mode):
                                         mode.input.input,
                                         mode.highlightCoords, 
                                         mode.underlineCoords))] = False
+                if (mode.input.isHeading == True):
+                    temp = True
+                else:
+                    temp = False
                 WorkspaceMode.createNoteGroups()
                 mode.appStarted()
+                mode.wantHeading = temp
                 mode.app.setActiveMode(mode.app.runWorkspaceMode)
     
     def toolChange(mode, event, button, tool):
