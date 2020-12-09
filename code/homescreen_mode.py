@@ -42,8 +42,7 @@ class HomescreenMode(Mode):
         if (mode.newWorkspaceButton.isOnButton(event)):
             mode.app.setActiveMode(mode.app.runCreateWorkspaceMode)
         elif (mode.instructionsButton.isOnButton(event)):
-            pass
-            #mode.app.setActiveMode(mode.app.runInstructionsMode)
+            mode.app.setActiveMode(mode.app.runInstructionsMode)
 
     def keyPressed(mode, event):
         mode.newWorkspaceName.typing(event)

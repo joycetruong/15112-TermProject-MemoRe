@@ -19,7 +19,7 @@ from homescreen_mode import HomescreenMode
 from create_workspace_mode import CreateWorkspaceMode
 from workspace_mode import WorkspaceMode
 from note_mode import NoteMode
-# from instructions_mode import InstructionsMode
+from instructions_mode import InstructionsMode
 
 # ModalApp framework inspired by:
 # https://github.com/spartace98/15-112-Term-Project/
@@ -27,7 +27,7 @@ class Main(ModalApp):
     def appStarted(app):           
         app.runHomescreenMode = HomescreenMode()
         app.runCreateWorkspaceMode = CreateWorkspaceMode()
-        # app.runInstructionsMode = InstructionsMode()
+        app.runInstructionsMode = InstructionsMode()
         app.runWorkspaceMode = WorkspaceMode()
         app.runNoteMode = NoteMode()
         app.setActiveMode(app.runWorkspaceMode) # run different modes here

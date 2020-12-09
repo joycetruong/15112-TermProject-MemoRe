@@ -53,10 +53,10 @@ class WorkspaceMode(Mode):
                 'history': 'aquamarine2',
                 'physical education': 'MediumPurple1'
            }
-    TAG_COLOR_BANK = {'peachpuff', 'navajo white', 'lemon chiffon', 
+    TAG_COLOR_BANK = ['peachpuff', 'navajo white', 'lemon chiffon', 
                             'DarkSeaGreen1', 'azure', 'alice blue', 
                             'lavender', 'lavender blush', 'misty rose', 
-                            'plum1'}
+                            'plum1']
     TAG_LOCATIONS = {}
     NOTE_TAGS = { 
                     'Note1': ['biology', 'english'], 
@@ -108,24 +108,33 @@ class WorkspaceMode(Mode):
     ADD_TAG_LOCATIONS = {}
 
     LOADING_NOTE = False
+    WORKSPACE_STARTED = False
     
     def appStarted(mode):
         WorkspaceMode.createNoteGroups()
 
         mode.createNewNoteButton = Button("Create New Note", (mode.width-190, 
                                     10, mode.width-10, 50))
+        mode.instructionsButton = Button("?", (mode.width-240, 10, 
+                                    mode.width-200, 50))
         mode.showNoteOptionsBox = False
         mode.noteOptionsBoxLocation = (0,0)
         mode.showAddTagBox = False
         mode.addTagBoxLocation = (0,0)
         mode.openNote = False
         mode.xButton = Button("X", (0,0,0,0))
+        mode.makeTagButton = Button("✓", (mode.width-55, mode.height-255, 
+                                    mode.width-15, mode.height-225))
+        mode.newTagName = Entry('New Tag', (0,0), (mode.width-255, 
+                            mode.height-255), 15, 1)
+        mode.linkNotes = False
+        mode.getMousePressed = False
 
     @staticmethod
     def createNoteGroups():
-        NOTE_GROUPS = []
-        NOTES_INCLUDED = []
-        NOTE_GROUP_LOCATIONS = []
+        WorkspaceMode.NOTE_GROUPS = []
+        WorkspaceMode.NOTES_INCLUDED = []
+        WorkspaceMode.NOTE_GROUP_LOCATIONS = []
         for note in WorkspaceMode.NOTES:
             if (note not in WorkspaceMode.NOTES_INCLUDED):
                 WorkspaceMode.NOTE_GROUPS.append([note])
@@ -151,32 +160,35 @@ class WorkspaceMode(Mode):
         return ((x2 - x1)**2 + (y2 - y1)**2)**0.5
 
     def mousePressed(mode, event):
+        if (mode.getMousePressed == True):
+            return event.x, event.y
+
         if (mode.createNewNoteButton.isOnButton(event)):
             mode.showNoteOptionsBox = False
             mode.showAddTagBox = False
             mode.app.setActiveMode(mode.app.runNoteMode)
+        elif (mode.instructionsButton.isOnButton(event)):
+            mode.showNoteOptionsBox = False
+            mode.showAddTagBox = False
+            WorkspaceMode.WORKSPACE_STARTED = True
+            mode.app.setActiveMode(mode.app.runInstructionsMode)
+        elif (mode.makeTagButton.isOnButton(event)):
+            WorkspaceMode.TAGS[mode.newTagName.input] = WorkspaceMode.TAG_COLOR_BANK[0]
+            WorkspaceMode.TAG_COLOR_BANK.pop(0)
+            WorkspaceMode.TAG_PRESSED[mode.newTagName.input] = False
+            mode.newTagName.input = ''
+            mode.newTagName.isTyping = False
+        elif ((mode.width-265 <= event.x <= mode.width-65) 
+            and (mode.height-255 <= event.y <= mode.height-225)):
+            mode.newTagName.isTyping = True
 
-        for tag in WorkspaceMode.TAG_LOCATIONS:
-            if ((WorkspaceMode.TAG_LOCATIONS[tag][0] <= event.x <= WorkspaceMode.TAG_LOCATIONS[tag][2])
-                and WorkspaceMode.TAG_LOCATIONS[tag][1] <= event.y <= WorkspaceMode.TAG_LOCATIONS[tag][3]):
-                if (WorkspaceMode.TAG_PRESSED[tag] == False):
-                    WorkspaceMode.NOTES_HIGHLIGHTED = []
-                    for note in WorkspaceMode.NOTE_TAGS:
-                        if (tag in WorkspaceMode.NOTE_TAGS[note]):
-                            WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
-                    for otherTag in WorkspaceMode.TAG_PRESSED:
-                        WorkspaceMode.TAG_PRESSED[otherTag] = False
-                    WorkspaceMode.TAG_PRESSED[tag] = True
-                else:
-                    WorkspaceMode.TAG_PRESSED[tag] = False
-                    WorkspaceMode.NOTES_HIGHLIGHTED = []
-        
         for note in WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS:
             if (mode.distance(event.x, event.y, 
                             WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][0],
                             WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[note][1]) 
                             <= 10):
-                if (WorkspaceMode.NOTE_SELECTED[note] == False):
+                if ((WorkspaceMode.NOTE_SELECTED[note] == False) 
+                    and (mode.linkNotes == False)):
                     for otherNote in WorkspaceMode.NOTE_SELECTED:
                         WorkspaceMode.NOTE_SELECTED[otherNote] = False
                     mode.showNoteOptionsBox = True
@@ -213,7 +225,25 @@ class WorkspaceMode(Mode):
                         return # stop clicking blue underneath and add tag box not showing up
                     elif ((mode.noteOptionsBoxLocation[0] <= event.x <= mode.noteOptionsBoxLocation[0]+210)
                         and (mode.noteOptionsBoxLocation[1]+100 <= event.y <= mode.noteOptionsBoxLocation[1]+150)):
-                        pass # add manual linking
+                        mode.linkNotes = True
+                        mode.showNoteOptionsBox = False
+                        return
+                    elif ((mode.noteOptionsBoxLocation[0] <= event.x <= mode.noteOptionsBoxLocation[0]+210)
+                        and (mode.noteOptionsBoxLocation[1]+150 <= event.y <= mode.noteOptionsBoxLocation[1]+200)):
+                        WorkspaceMode.NOTES.pop(note)
+                        for noteObject in WorkspaceMode.NOTE_OBJECTS:
+                            if (note == str(noteObject)):
+                                toRemove = noteObject
+                        WorkspaceMode.NOTE_OBJECTS.remove(toRemove)
+                        for otherNote in WorkspaceMode.NOTES:
+                            if (note in WorkspaceMode.NOTES[otherNote]):
+                                WorkspaceMode.NOTES[otherNote].remove(note)
+                        WorkspaceMode.NOTE_TAGS.pop(note)
+                        WorkspaceMode.NOTE_SELECTED.pop(note)
+                        WorkspaceMode.createNoteGroups()
+                        WorkspaceMode.NOTE_SELECTED[note] = False
+                        mode.showNoteOptionsBox = False
+                        return
                     elif (mode.xButton.isOnButton(event)):
                         WorkspaceMode.NOTE_SELECTED[note] = False
                         mode.showNoteOptionsBox = False
@@ -232,9 +262,69 @@ class WorkspaceMode(Mode):
                                     WorkspaceMode.NOTES_HIGHLIGHTED.remove(note)
                             WorkspaceMode.NOTE_SELECTED[note] = False
                             mode.showAddTagBox = False
+                            return
                     if (mode.xButton.isOnButton(event)):
                         WorkspaceMode.NOTE_SELECTED[note] = False
                         mode.showAddTagBox = False
+                
+                if (mode.linkNotes == True):
+                    if (mode.xButton.isOnButton(event)):
+                        WorkspaceMode.NOTE_SELECTED[note] = False
+                        mode.linkNotes = False
+                    else:
+                        mode.getMousePressed = True
+                        noteToLinkX, noteToLinkY = mode.mousePressed(event)
+                        mode.getMousePressed = False
+                        for noteToLink in WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS:
+                            if (mode.distance(noteToLinkX, noteToLinkY, 
+                            WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[noteToLink][0],
+                            WorkspaceMode.NOTE_INDIVIDUAL_LOCATIONS[noteToLink][1]) 
+                            <= 10):
+                                if (noteToLink not in WorkspaceMode.NOTES[note]):
+                                    WorkspaceMode.NOTES[noteToLink].append(note)
+                                    WorkspaceMode.NOTES[note].append(noteToLink)
+                                else:
+                                    WorkspaceMode.NOTES[noteToLink].remove(note)
+                                    WorkspaceMode.NOTES[note].remove(noteToLink)
+                        WorkspaceMode.createNoteGroups()
+                        mode.linkNotes = False
+                        WorkspaceMode.NOTE_SELECTED[note] = False
+                        return
+
+        for tag in WorkspaceMode.TAG_LOCATIONS:
+            if ((WorkspaceMode.TAG_LOCATIONS[tag][0] <= event.x <= WorkspaceMode.TAG_LOCATIONS[tag][2])
+                and WorkspaceMode.TAG_LOCATIONS[tag][1] <= event.y <= WorkspaceMode.TAG_LOCATIONS[tag][3]):
+                if (WorkspaceMode.TAG_PRESSED[tag] == False):
+                    WorkspaceMode.NOTES_HIGHLIGHTED = []
+                    for note in WorkspaceMode.NOTE_TAGS:
+                        if (tag in WorkspaceMode.NOTE_TAGS[note]):
+                            WorkspaceMode.NOTES_HIGHLIGHTED.append(note)
+                    for otherTag in WorkspaceMode.TAG_PRESSED:
+                        WorkspaceMode.TAG_PRESSED[otherTag] = False
+                    WorkspaceMode.TAG_PRESSED[tag] = True
+                else:
+                    WorkspaceMode.TAG_PRESSED[tag] = False
+                    WorkspaceMode.NOTES_HIGHLIGHTED = []
+
+    def mouseMoved(mode, event):
+        if (mode.createNewNoteButton.isOnButton(event)):
+            mode.createNewNoteButton.buttonColor = 'light blue'
+        elif (not mode.createNewNoteButton.isOnButton(event)):
+            mode.createNewNoteButton.buttonColor = 'white'
+
+        if (mode.instructionsButton.isOnButton(event)):
+            mode.instructionsButton.buttonColor = 'light blue'
+        elif (not mode.instructionsButton.isOnButton(event)):
+            mode.instructionsButton.buttonColor = 'white'
+
+        if (mode.makeTagButton.isOnButton(event)):
+            mode.makeTagButton.buttonColor = 'light blue'
+        elif (not mode.makeTagButton.isOnButton(event)):
+            mode.makeTagButton.buttonColor = 'white'
+
+    def keyPressed(mode, event):
+        if (mode.newTagName.isTyping == True):
+            mode.newTagName.typing(event)
 
     # Algorithm for rows and columns layout inspired by:
     # https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html#exampleGrids
@@ -352,6 +442,12 @@ class WorkspaceMode(Mode):
                 WorkspaceMode.TAG_LOCATIONS[tag] = (25+dx, mode.height-200+dy, 
                                             35+tagSize+dx, mode.height-170+dy)
                 dx += tagSize + 20
+        
+        canvas.create_rectangle(mode.width-265, mode.height-255, mode.width-65, 
+                                    mode.height-225, fill='white')
+        canvas.create_text(mode.width-275, mode.height-240, 
+                            text='Create New Tag:', font='Gilroy 20', 
+                            fill='gray20', anchor=E)
     
     def drawNoteOptionsBox(mode, canvas):
         canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
@@ -377,14 +473,21 @@ class WorkspaceMode(Mode):
                                     fill='white')
         canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
                            mode.noteOptionsBoxLocation[1]+125, 
-                           text='Link', font='Gilroy 15', fill='gray20')
-        
+                           text='Link/Unlink', font='Gilroy 15', fill='gray20')
+        canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
+                                    mode.noteOptionsBoxLocation[1]+150, 
+                                    mode.noteOptionsBoxLocation[0]+210, 
+                                    mode.noteOptionsBoxLocation[1]+200, 
+                                    fill='white')
+        canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
+                           mode.noteOptionsBoxLocation[1]+175, 
+                           text='Delete Note', font='Gilroy 15', fill='gray20')
+
         mode.xButton.location = mode.noteOptionsBoxLocation[0]-30, \
                                       mode.noteOptionsBoxLocation[1]-30, \
                                       mode.noteOptionsBoxLocation[0], \
                                       mode.noteOptionsBoxLocation[1] 
         mode.xButton.makeButton(canvas)
-        
 
     def drawAddTagBox(mode, canvas):
         canvas.create_rectangle(mode.addTagBoxLocation[0], 
@@ -419,7 +522,32 @@ class WorkspaceMode(Mode):
                                       mode.addTagBoxLocation[0] + 30, \
                                       mode.addTagBoxLocation[1] + 30 
         mode.xButton.makeButton(canvas)
+
+    def drawAddLinkBox(mode, canvas):
+        canvas.create_rectangle(mode.noteOptionsBoxLocation[0], 
+                                    mode.noteOptionsBoxLocation[1], 
+                                    mode.noteOptionsBoxLocation[0]+210, 
+                                    mode.noteOptionsBoxLocation[1]+50, 
+                                    fill='white')
+        canvas.create_text(mode.noteOptionsBoxLocation[0]+105, 
+                           mode.noteOptionsBoxLocation[1]+25, 
+                           text='Click on another note.', font='Gilroy 15', 
+                           fill='gray20')
         
+        mode.xButton.location = mode.noteOptionsBoxLocation[0]-30, \
+                                      mode.noteOptionsBoxLocation[1]-30, \
+                                      mode.noteOptionsBoxLocation[0], \
+                                      mode.noteOptionsBoxLocation[1] 
+        mode.xButton.makeButton(canvas)
+
+    def drawButtons(mode, canvas):
+        mode.createNewNoteButton.makeButton(canvas)
+        mode.instructionsButton.makeButton(canvas)
+        mode.makeTagButton.makeButton(canvas)
+
+    def drawInput(mode, canvas):
+        mode.newTagName.showTyping(canvas)
+
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, mode.height, 
                                 fill='white smoke')
@@ -428,12 +556,16 @@ class WorkspaceMode(Mode):
         mode.drawMap(canvas)
         mode.drawHighlightedTags(canvas)
         mode.drawTagBox(canvas)
-        mode.createNewNoteButton.makeButton(canvas)
+        mode.drawButtons(canvas)
+        mode.drawInput(canvas)
     
         if (mode.showNoteOptionsBox == True):
             mode.drawNoteOptionsBox(canvas)
             
         if (mode.showAddTagBox == True):
             mode.drawAddTagBox(canvas)
+        
+        if (mode.linkNotes == True):
+            mode.drawAddLinkBox(canvas)
 
 

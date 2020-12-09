@@ -142,6 +142,17 @@ class NoteMode(Mode):
                 mode.underlineCoords += [mode.currentCoords]
         mode.currentCoords = [0, 0, 0, 0]
 
+    def mouseMoved(mode, event):
+        if (mode.saveButton.isOnButton(event)):
+            mode.saveButton.buttonColor = 'light blue'
+        elif (not mode.saveButton.isOnButton(event)):
+            mode.saveButton.buttonColor = 'white'
+        
+        if (mode.backButton.isOnButton(event)):
+            mode.backButton.buttonColor = 'light blue'
+        elif (not mode.backButton.isOnButton(event)):
+            mode.backButton.buttonColor = 'white'
+
     def keyPressed(mode, event):
         if (mode.askName == False):
             mode.input.typing(event)
