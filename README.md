@@ -8,7 +8,9 @@ built-in text editor, and then link them to other notes if those other notes are
 
 ## How to run
 To run the project, build main.py and run it. Make sure that the active mode is set to the homescreen mode by checking that line 33 is app.setActiveMode(app.runHomescreenMode). 
+
 Make sure that you have the Menlo font family pack downloaded at: https://www.cufonfonts.com/font/menlo
+
 Make sure that you also have the Gilroy font family pack downloaded at: https://www.dafontfree.io/gilroy-font-family/#:~:text=Gilroy%20is%20a%20modern%20sans,powerful%20opentype%20features%20in%20mind.
 
 ## Libraries needed
