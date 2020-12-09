@@ -27,6 +27,8 @@ class Entry(object):
         self.styles = {'normal': True, 
                        'bolded': False, 
                        'italicized': False}
+        self.isHeading = False
+        self.lastLineLength = 0
     
     def __repr__(self):
         return self.input
@@ -38,33 +40,89 @@ class Entry(object):
                 self.input += ' '
                 self.currentLineLength += 1 
             elif (event.key == 'Delete'):
-                if (self.input[-1] == '\n'):
+                if (self.input == ''):
+                    pass
+                elif ((len(self.input) >= 2) and (self.input[-2] == '`')):
                     self.input = self.input[:-2]
-                    self.currentLineLength += self.lineLength - 1
+                    self.currentLineLength -= 2
+                    if (self.currentLineLength == 0):
+                        self.isHeading = False
+                elif ((len(self.input) >= 6) 
+                    and ((self.input[-6:-1] == '~BLD~') 
+                    or (self.input[-6:-1] == '~ITL~'))):
+                    self.input = self.input[:-6]
+                elif ((len(self.input) >= 6) and (self.input[-6:] == 'DOUB\n\n')):
+                    if (self.lastLineLength == 0):
+                        self.currentLineLength = 0
+                        self.input = self.input[:-6]
+                    elif (self.lastLineLength < self.lineLength):
+                        self.currentLineLength = self.lastLineLength - 1
+                        self.input = self.input[:-8]
+                    else:
+                        self.currentLineLength = self.lineLength - 1
+                        self.input = self.input[:-8]
+                    self.isHeading = True
+                elif (self.input[-1] == '\n'):
+                    if (self.lastLineLength == 0):
+                        self.currentLineLength  = 0
+                        self.input = self.input[:-1]
+                    elif (self.lastLineLength < self.lineLength):
+                        self.currentLineLength = self.lastLineLength - 1
+                        self.input = self.input[:-2]
+                    else:
+                        self.currentLineLength = self.lineLength - 1
+                        self.input = self.input[:-2]
+                    self.isHeading = False
                 else:
                     self.input = self.input[:-1]
                     self.currentLineLength -= 1
+
             elif (event.key == 'Enter'):
-                self.input += '\n'
-                self.currentLineLength = 0
+                if (self.isHeading == True):
+                    self.input += 'DOUB\n\n'
+                    self.isHeading = False
+                    self.lastLineLength = self.currentLineLength
+                    self.currentLineLength = 0
+                else:
+                    self.input += '\n'
+                    self.lastLineLength = self.currentLineLength
+                    self.currentLineLength = 0
+
             elif (event.key in bannedKeys):
                 pass
             else:
                 if (self.input.count('\n') < self.maxLines):
                     style = self.getStyle()
                     if (style == 'normal'):
-                        self.input += event.key
-                        self.currentLineLength += 1  
+                        if (event.key == '??'):
+                            pass
+                        else:
+                            if ((event.key == '#')
+                                and (self.currentLineLength == 0)):
+                                self.isHeading = True
+                            elif (self.isHeading == True):
+                                self.input += '`' + event.key
+                                self.currentLineLength += 2
+                            else:
+                                self.input += event.key
+                                self.currentLineLength += 1  
                     elif (style == 'bolded'):
                         self.input += '~BLD~' + event.key
                         self.currentLineLength += 1 
                     elif (style == 'italicized'):
                         self.input += '~ITL~' + event.key
                         self.currentLineLength += 1 
-                    if (self.currentLineLength == self.lineLength): 
-                        self.input += '\n' 
-                        self.currentLineLength = 0 
-    
+                    if (self.currentLineLength >= self.lineLength): 
+                        if (self.isHeading == True):
+                            self.input += '\n\n'
+                            self.lastLineLength = self.lineLength
+                            self.currentLineLength = 0
+                            self.isHeading = False
+                        else:
+                            self.input += '\n' 
+                            self.lastLineLength = self.lineLength
+                            self.currentLineLength = 0 
+
     def drawInputPrompt(self, canvas):
         canvas.create_text(self.promptLocation[0], self.promptLocation[1], 
                             text=self.label, font='Gilroy 20 bold', 
@@ -74,9 +132,17 @@ class Entry(object):
         writing = []
         index = 0
         while (len(self.input) != index):
-            if (self.input[index] == '~'):
+            if ((len(self.input) >= 6)
+                and ((self.input[index:index+5] == '~BLD~') 
+                or (self.input[index:index+5] == '~ITL~'))):
                 writing += [self.input[index:index+6]]
                 index += 6
+            elif ((len(self.input) >= 4) and self.input[index:index+4] == 'DOUB'):
+                index += 4
+                pass
+            elif ((len(self.input) >= 2) and (self.input[index] == '`')):
+                writing += [self.input[index:index+2]]
+                index += 2
             else:
                  writing += [self.input[index]]
                  index += 1
@@ -92,13 +158,19 @@ class Entry(object):
                 if (char.startswith('~BLD~')):
                     canvas.create_text(xStart+dx, yStart+dy, text=char[-1], 
                                     font='Menlo 20 bold', anchor=NW)
+                    dx += 12
                 elif (char.startswith('~ITL~')):
                     canvas.create_text(xStart+dx, yStart+dy, text=char[-1], 
                                     font='Menlo 20 italic', anchor=NW)
+                    dx += 12
+                elif (char.startswith('`')):
+                    canvas.create_text(xStart+dx, yStart+dy, text=char[-1], 
+                                    font='Menlo 40 bold', anchor=NW)
+                    dx += 22
                 else:
                     canvas.create_text(xStart+dx, yStart+dy, text=char, 
-                                    font='Menlo 20', anchor=NW)
-                dx += 12
+                                        font='Menlo 20', anchor=NW)
+                    dx += 12
 
     def showPromptAnswerTyping(self, canvas):
         canvas.create_text(self.inputLocation[0], self.inputLocation[1],

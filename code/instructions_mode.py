@@ -55,7 +55,7 @@ class InstructionsMode(Mode):
                             fill='gray20', font='Gilroy 15 bold', anchor=W)
         canvas.create_text(50, 130, text='   -   There is a maximum of 20 tags allowed', 
                             fill='gray20', font='Gilroy 15', anchor=W)
-        canvas.create_text(50, 155, text='   -   Please do not type \'~\' in the text editor', 
+        canvas.create_text(50, 155, text='   -   Please do not type \'~\' or \'`\' in any input box/the text editor', 
                             fill='gray20', font='Gilroy 15', anchor=W)
         canvas.create_text(50, 180, text='   -   Notes are not allowed to have spaces in their names, spaces will be replaced with \'-\'', 
                             fill='gray20', font='Gilroy 15', anchor=W)
@@ -71,6 +71,8 @@ class InstructionsMode(Mode):
         canvas.create_text(50, 325, text='        Make sure that you do not change the name that pops up and just click save so that it saves as the same note.', 
                             fill='gray20', font='Gilroy 15', anchor=W)
         canvas.create_text(50, 345, text='        Otherwise, saving it by a different name will create a new note.', 
+                            fill='gray20', font='Gilroy 15', anchor=W)
+        canvas.create_text(50, 370, text='   -   Typing \'#\' on a new line makes that line a header.', 
                             fill='gray20', font='Gilroy 15', anchor=W)
 
     def redrawAll(mode, canvas):

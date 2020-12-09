@@ -30,6 +30,6 @@ class Main(ModalApp):
         app.runInstructionsMode = InstructionsMode()
         app.runWorkspaceMode = WorkspaceMode()
         app.runNoteMode = NoteMode()
-        app.setActiveMode(app.runWorkspaceMode) # run different modes here
+        app.setActiveMode(app.runHomescreenMode) # run different modes here
 
 Main(width=1000, height=700)
